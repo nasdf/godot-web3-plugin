@@ -3,7 +3,7 @@
 
 #include "core/reference.h"
 
-class Keccak: public Reference {
+class Keccak : public Reference {
   GDCLASS(Keccak, Reference);
 
 private:
