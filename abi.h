@@ -7,29 +7,31 @@
 class ABI : public Resource {
   GDCLASS(ABI, Resource);
 
-  // struct Function {
-  //   String type;
-  //   String name;
-  //   String state_mutability;
+  struct Parameter {
+    String type;
+    String name;
+    Vector<Parameter> components;
+  };
 
-  //   // inputs
-  //   // outputs
-  // };
+  struct Function {
+    String type;
+    String name;
+    String signature;
+    Vector<Parameter> inputs;
+    Vector<Parameter> outputs;
+  };
+
+  HashMap<String, Function> functions;
+  void parse_function(const Dictionary &p_function);
 
 protected:
   static void _bind_methods();
 
-private:
-  Array entries;
-  // List<Function> functions;
-  // Vector<ABI::Event> events;
-  // Vector<ABI::Error> errors;
-
 public:
-  Error from_json(const String &p_json);
+  Error parse(const String &p_json);
 
-  void set_entries(const Array &p_entries);
-  Array get_entries();
+  String encode_function_inputs(const String &p_name, const Array &p_inputs);
+  // void decode_function_outputs(const String &p_name, const Array &p_outputs);
 };
 
 class ResourceFormatLoaderABI : public ResourceFormatLoader {
