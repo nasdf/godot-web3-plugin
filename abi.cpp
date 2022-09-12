@@ -20,7 +20,7 @@ String ABI::encode_function_inputs(const String &p_name, const Array &p_inputs) 
     Parameter input = inputs[i];
     Variant value = p_inputs[i];
 
-    if (input.type == "address") {
+    if (input.type == "address" || input.type == "uint256") {
       enc += String(value).trim_prefix("0x").lpad(64, "0");
     } else {
       ERR_FAIL_COND_V_MSG(true, String(), "Unsupported input type");
