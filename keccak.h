@@ -13,11 +13,11 @@ protected:
   static void _bind_methods();
 
 public:
-  Keccak();
-  ~Keccak();
-
   Error update(PoolByteArray p_chunk);
   PoolByteArray finish();
+
+  Keccak();
+  ~Keccak();
 };
 
 #endif // KECCAK_H

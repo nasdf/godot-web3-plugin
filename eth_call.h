@@ -9,7 +9,8 @@
 class EthCall : public Node {
   GDCLASS(EthCall, Node);
 
-  Ref<ABI> abi;
+  Ref<ABI> contract_abi;
+  String contract_address;
 
   RPCRequest *rpc_request = nullptr;
   void _request_completed(int p_status, const Dictionary &p_result);
@@ -18,10 +19,13 @@ protected:
   static void _bind_methods();
 
 public:
-  void set_abi(const Ref<ABI> &p_abi);
-  Ref<ABI> get_abi() const;
+  void set_contract_abi(const Ref<ABI> &p_abi);
+  Ref<ABI> get_contract_abi() const;
 
-  Error request(const String &p_to, const String &p_from, const String &p_name, const Array &p_inputs);
+  void set_contract_address(const String &p_address);
+  String get_contract_address() const;
+
+  Error request(const String &p_name, const Array &p_inputs);
 
   EthCall();
 };

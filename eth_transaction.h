@@ -5,35 +5,38 @@
 
 #include "abi.h"
 #include "rpc_request.h"
+#include "transaction.h"
 
 class EthTransaction : public Node {
   GDCLASS(EthTransaction, Node);
 
-  enum State {
-    STATE_IDLE,
-    STATE_NONCE,
-    STATE_CHAIN_ID,
-    STATE_GAS_PRICE,
-    STATE_GAS_ESTIMATE,
-    STATE_SEND_TRANSACTION
-  };
+  Ref<ABI> contract_abi;
+  String contract_address;
+  Transaction *transaction = nullptr;
 
-  State state;
-  Dictionary tx;
-  Ref<ABI> abi;
+  RPCRequest *nonce_request = nullptr;
+  RPCRequest *chain_id_request = nullptr;
+  RPCRequest *gas_price_request = nullptr;
+  RPCRequest *estimate_gas_request = nullptr;
+  RPCRequest *send_raw_tx_request = nullptr;
 
-  RPCRequest *rpc_request = nullptr;
-  Error _request(const Variant &p_result);
-  void _request_completed(int p_status, const Dictionary &p_result);
+  void _nonce_request_completed(int p_status, const Dictionary &p_result);
+  void _chain_id_request_completed(int p_status, const Dictionary &p_result);
+  void _gas_price_request_completed(int p_status, const Dictionary &p_result);
+  void _estimate_gas_request_completed(int p_status, const Dictionary &p_result);
+  void _send_raw_tx_request_completed(int p_status, const Dictionary &p_result);
   
 protected:
   static void _bind_methods();
 
 public:
-  void set_abi(const Ref<ABI> &p_abi);
-  Ref<ABI> get_abi() const;
+  void set_contract_abi(const Ref<ABI> &p_abi);
+  Ref<ABI> get_contract_abi() const;
 
-  Error request(const String &p_to, const String &p_from, const String &p_name, const Array &p_inputs);
+  void set_contract_address(const String &p_address);
+  String get_contract_address() const;
+
+  Error request(const String &p_name, const Array &p_inputs);
 
   EthTransaction();
 };

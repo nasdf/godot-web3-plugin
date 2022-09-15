@@ -1,102 +1,153 @@
 #include "eth_transaction.h"
 
-Error EthTransaction::request(const String &p_to, const String &p_from, const String &p_name, const Array &p_inputs) {
-  ERR_FAIL_COND_V_MSG(!abi.is_valid(), ERR_UNCONFIGURED, "ABI is undefined.");
-  ERR_FAIL_COND_V_MSG(state != STATE_IDLE, ERR_BUSY, "Transaction in progress.");
+Error EthTransaction::request(const String &p_name, const Array &p_inputs) {
+  ERR_FAIL_COND_V_MSG(!contract_abi.is_valid(), ERR_UNCONFIGURED, "Contract ABI is undefined.");
+  ERR_FAIL_COND_V_MSG(contract_address.empty(), ERR_UNCONFIGURED, "Contract address is empty.");
 
-  tx.clear();
-  tx["to"] = p_to;
-  tx["from"] = p_from;
-  tx["data"] = abi->encode_function_inputs(p_name, p_inputs);
+  transaction = memnew(Transaction);  
+  transaction->set_to(contract_address);
+  transaction->set_data(contract_abi->encode_function_inputs(p_name, p_inputs));
 
-  return _request(p_from);
+  Array params;
+  params.push_back("0x0000000000000000000000000000000000000000"); // TODO from address
+  params.push_back("latest");
+
+  return nonce_request->request("eth_getTransactionCount", params);
 }
 
-Error EthTransaction::_request(const Variant &p_result) {
-  switch (state) {
-    case STATE_IDLE: {
-      state = STATE_NONCE;
-
-      Array params;
-      params.push_back(p_result);
-      params.push_back("latest");
-
-      return rpc_request->request("eth_getTransactionCount", params);
-    }
-    case STATE_NONCE:
-      tx["nonce"] = p_result;
-      state = STATE_CHAIN_ID;
-      return rpc_request->request("eth_chainId");
-    case STATE_CHAIN_ID:
-      tx["chainId"] = p_result;
-      state = STATE_GAS_PRICE;
-      return rpc_request->request("eth_gasPrice");
-    case STATE_GAS_PRICE: {
-      tx["gasPrice"] = p_result;
-      state = STATE_GAS_ESTIMATE;
-      
-      Array params;
-      params.push_back(tx);
-
-      return rpc_request->request("eth_estimateGas", params);
-    } 
-    case STATE_GAS_ESTIMATE:
-      tx["gasLimit"] = p_result;
-      state = STATE_SEND_TRANSACTION;
-
-      // TODO sign transaction
-      // TODO eth_sendRawTransaction
-
-      return rpc_request->request("eth_sendRawTransaction");
-    default:
-      return ERR_BUG;
-  }
-}
-
-void EthTransaction::_request_completed(int p_status, const Dictionary &p_result) {
+void EthTransaction::_nonce_request_completed(int p_status, const Dictionary &p_result) {
   if (p_status != RPCRequest::RESULT_SUCCESS) {
-    state = STATE_IDLE;
     emit_signal("request_completed", p_status, Dictionary());
     return;
   }
 
-  if (state == STATE_SEND_TRANSACTION) {
-    state = STATE_IDLE;
-    emit_signal("request_completed", p_status, p_result);
-    return;
-  }
+  transaction->set_nonce(p_result["result"]);
 
-  Error err = _request(p_result["result"]);
+  Error err = chain_id_request->request("eth_chainId");
   if (err != OK) {
-    state = STATE_IDLE;
     emit_signal("request_completed", RPCRequest::RESULT_HTTP_ERROR, Dictionary());
   }
 }
 
-void EthTransaction::set_abi(const Ref<ABI> &p_abi) {
-  abi = p_abi;
+void EthTransaction::_chain_id_request_completed(int p_status, const Dictionary &p_result) {
+  if (p_status != RPCRequest::RESULT_SUCCESS) {
+    emit_signal("request_completed", p_status, Dictionary());
+    return;
+  }
+
+  transaction->set_chain_id(p_result["result"]);
+
+  Error err = gas_price_request->request("eth_gasPrice");
+  if (err != OK) {
+    emit_signal("request_completed", RPCRequest::RESULT_HTTP_ERROR, Dictionary());
+  }
 }
 
-Ref<ABI> EthTransaction::get_abi() const {
-  return abi;
+void EthTransaction::_gas_price_request_completed(int p_status, const Dictionary &p_result) {
+  if (p_status != RPCRequest::RESULT_SUCCESS) {
+    emit_signal("request_completed", p_status, Dictionary());
+    return;
+  }
+
+  transaction->set_gas_price(p_result["result"]);
+
+  Dictionary tx;
+  tx["to"] = transaction->get_to();
+  tx["data"] = transaction->get_data();
+
+  Array params;
+  params.push_back(tx);
+
+  Error err = estimate_gas_request->request("eth_estimateGas", params);
+  if (err != OK) {
+    emit_signal("request_completed", RPCRequest::RESULT_HTTP_ERROR, Dictionary());
+  }
+}
+
+void EthTransaction::_estimate_gas_request_completed(int p_status, const Dictionary &p_result) {
+  if (p_status != RPCRequest::RESULT_SUCCESS) {
+    emit_signal("request_completed", p_status, Dictionary());
+    return;
+  }
+
+  transaction->set_gas_limit(p_result["result"]);
+
+  Error err = send_raw_tx_request->request("eth_sendRawTransaction");
+  if (err != OK) {
+    emit_signal("request_completed", RPCRequest::RESULT_HTTP_ERROR, Dictionary());
+  }
+}
+
+void EthTransaction::_send_raw_tx_request_completed(int p_status, const Dictionary &p_result) {
+  if (p_status != RPCRequest::RESULT_SUCCESS) {
+    emit_signal("request_completed", p_status, Dictionary());
+    return;
+  }
+
+  // generate random private key
+  // Ref<Crypto> crypto = Ref<Crypto>(Crypto::create());
+  // PoolByteArray uuid = crypto->generate_random_bytes(16);
+
+  memdelete(transaction);
+  transaction = nullptr;
+
+  emit_signal("request_completed", p_status, p_result);
+}
+
+void EthTransaction::set_contract_abi(const Ref<ABI> &p_abi) {
+  contract_abi = p_abi;
+}
+
+Ref<ABI> EthTransaction::get_contract_abi() const {
+  return contract_abi;
+}
+
+void EthTransaction::set_contract_address(const String &p_address) {
+  contract_address = p_address;
+}
+
+String EthTransaction::get_contract_address() const {
+  return contract_address;
 }
 
 void EthTransaction::_bind_methods() {
   ClassDB::bind_method(D_METHOD("request", "name", "inputs"), &EthTransaction::request);
-  ClassDB::bind_method("_request_completed", &EthTransaction::_request_completed);
+  ClassDB::bind_method("_nonce_request_completed", &EthTransaction::_nonce_request_completed);
+  ClassDB::bind_method("_chain_id_request_completed", &EthTransaction::_chain_id_request_completed);
+  ClassDB::bind_method("_gas_price_request_completed", &EthTransaction::_gas_price_request_completed);
+  ClassDB::bind_method("_estimate_gas_request_completed", &EthTransaction::_estimate_gas_request_completed);
+  ClassDB::bind_method("_send_raw_tx_request_completed", &EthTransaction::_send_raw_tx_request_completed);
 
-  ClassDB::bind_method(D_METHOD("set_abi", "abi"), &EthTransaction::set_abi);
-  ClassDB::bind_method(D_METHOD("get_abi"), &EthTransaction::get_abi);
+  ClassDB::bind_method(D_METHOD("set_contract_abi", "abi"), &EthTransaction::set_contract_abi);
+  ClassDB::bind_method(D_METHOD("get_contract_abi"), &EthTransaction::get_contract_abi);
 
-  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "abi", PROPERTY_HINT_RESOURCE_TYPE, "ABI"), "set_abi", "get_abi");
+  ClassDB::bind_method(D_METHOD("set_contract_address", "address"), &EthTransaction::set_contract_address);
+  ClassDB::bind_method(D_METHOD("get_contract_address"), &EthTransaction::get_contract_address);
+
+  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "contract_abi", PROPERTY_HINT_RESOURCE_TYPE, "ABI"), "set_contract_abi", "get_contract_abi");
+  ADD_PROPERTY(PropertyInfo(Variant::STRING, "contract_address"), "set_contract_address", "get_contract_address");
 
   ADD_SIGNAL(MethodInfo("request_completed", PropertyInfo(Variant::INT, "status"), PropertyInfo(Variant::DICTIONARY, "result")));
 }
 
 EthTransaction::EthTransaction() {
-  state = STATE_IDLE;
+  nonce_request = memnew(RPCRequest);
+  add_child(nonce_request);
+  nonce_request->connect("request_completed", this, "_nonce_request_completed");
 
-  rpc_request = memnew(RPCRequest);
-  add_child(rpc_request);
-  rpc_request->connect("request_completed", this, "_request_completed");
+  chain_id_request = memnew(RPCRequest);
+  add_child(chain_id_request);
+  chain_id_request->connect("request_completed", this, "_chain_id_request_completed");
+
+  gas_price_request = memnew(RPCRequest);
+  add_child(gas_price_request);
+  gas_price_request->connect("request_completed", this, "_gas_price_request_completed");
+
+  estimate_gas_request = memnew(RPCRequest);
+  add_child(estimate_gas_request);
+  estimate_gas_request->connect("request_completed", this, "_estimate_gas_request_completed");
+
+  send_raw_tx_request = memnew(RPCRequest);
+  add_child(send_raw_tx_request);
+  send_raw_tx_request->connect("request_completed", this, "_send_raw_tx_request_completed");
 }

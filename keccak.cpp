@@ -2,15 +2,6 @@
 
 #include "thirdparty/trezor-crypto/sha3.h"
 
-Keccak::Keccak() {
-  ctx = memalloc(sizeof(SHA3_CTX));
-  keccak_256_Init((SHA3_CTX *)ctx);
-}
-
-Keccak::~Keccak() {
-  memfree((SHA3_CTX *)ctx);
-}
-
 Error Keccak::update(PoolByteArray p_chunk) {
   ERR_FAIL_COND_V(ctx == nullptr, ERR_UNCONFIGURED);
   size_t len = p_chunk.size();
@@ -31,4 +22,13 @@ PoolByteArray Keccak::finish() {
 void Keccak::_bind_methods() {
   ClassDB::bind_method(D_METHOD("update", "chunk"), &Keccak::update);
   ClassDB::bind_method(D_METHOD("finish"), &Keccak::finish);
+}
+
+Keccak::Keccak() {
+  ctx = memalloc(sizeof(SHA3_CTX));
+  keccak_256_Init((SHA3_CTX *)ctx);
+}
+
+Keccak::~Keccak() {
+  memfree((SHA3_CTX *)ctx);
 }

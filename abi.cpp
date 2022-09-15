@@ -18,13 +18,10 @@ String ABI::encode_function_inputs(const String &p_name, const Array &p_inputs) 
 
   for (int i = 0; i < p_inputs.size(); i++) {
     Parameter input = inputs[i];
-    Variant value = p_inputs[i];
+    ERR_FAIL_COND_V_MSG(input.type != "address" && input.type != "uint256", String(), "Unsupported input type");
 
-    if (input.type == "address" || input.type == "uint256") {
-      enc += String(value).trim_prefix("0x").lpad(64, "0");
-    } else {
-      ERR_FAIL_COND_V_MSG(true, String(), "Unsupported input type");
-    }
+    String value = p_inputs[i];
+    enc += value.trim_prefix("0x").lpad(64, "0");
   }
 
   return enc;
