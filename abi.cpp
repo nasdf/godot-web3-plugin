@@ -1,6 +1,6 @@
 #include "abi.h"
 
-#include "thirdparty/trezor-crypto/sha3.h"
+#include "keccak.h"
 
 #include "core/io/json.h"
 #include "core/os/file_access.h"
@@ -89,10 +89,10 @@ void ABI::parse_function(const Dictionary &p_function) {
 
   signature += ")";
 
-  // TODO move to helper function
   CharString cs = signature.utf8();
-  unsigned char hash[32];
-  keccak_256((unsigned char *)cs.ptr(), cs.length(), hash);
+  uint8_t hash[32];
+
+  Keccak::hash((unsigned char *)cs.ptr(), cs.length(), hash);
   function.signature = String::hex_encode_buffer(hash, 4);
 
   functions[function.name] = function;

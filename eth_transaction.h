@@ -6,13 +6,16 @@
 #include "abi.h"
 #include "rpc_request.h"
 #include "transaction.h"
+#include "wallet.h"
 
 class EthTransaction : public Node {
   GDCLASS(EthTransaction, Node);
 
   Ref<ABI> contract_abi;
   String contract_address;
-  Transaction *transaction = nullptr;
+
+  Ref<Wallet> wallet;
+  Transaction *transaction;
 
   RPCRequest *nonce_request = nullptr;
   RPCRequest *chain_id_request = nullptr;
@@ -24,7 +27,7 @@ class EthTransaction : public Node {
   void _chain_id_request_completed(int p_status, const Dictionary &p_result);
   void _gas_price_request_completed(int p_status, const Dictionary &p_result);
   void _estimate_gas_request_completed(int p_status, const Dictionary &p_result);
-  void _send_raw_tx_request_completed(int p_status, const Dictionary &p_result);
+  void _request_completed(int p_status, const Dictionary &p_result = Dictionary());
   
 protected:
   static void _bind_methods();
@@ -36,7 +39,7 @@ public:
   void set_contract_address(const String &p_address);
   String get_contract_address() const;
 
-  Error request(const String &p_name, const Array &p_inputs);
+  Error request(const String &p_name, const Array &p_inputs, Ref<Wallet> p_wallet);
 
   EthTransaction();
 };

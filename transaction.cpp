@@ -56,6 +56,30 @@ String Transaction::get_chain_id() const {
   return chain_id;
 }
 
+void Transaction::set_v(const String &p_v) {
+  v = p_v;
+}
+
+String Transaction::get_v() const {
+  return v;
+}
+
+void Transaction::set_r(const String &p_r) {
+  r = p_r;
+}
+
+String Transaction::get_r() const {
+  return r;
+}
+
+void Transaction::set_s(const String &p_s) {
+  s = p_s;
+}
+
+String Transaction::get_s() const {
+  return s;
+}
+
 PoolByteArray Transaction::encode() {
   PoolByteArray list;
   list.append_array(rlp.encode(nonce));
@@ -64,7 +88,7 @@ PoolByteArray Transaction::encode() {
   list.append_array(rlp.encode(to));
   list.append_array(rlp.encode(value));
   list.append_array(rlp.encode(data));
-  list.append_array(rlp.encode(chain_id));
+  list.append_array(rlp.encode(v.empty() ? chain_id : v));
   list.append_array(rlp.encode(r));
   list.append_array(rlp.encode(s));
 
@@ -97,6 +121,15 @@ void Transaction::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_chain_id", "chain_id"), &Transaction::set_chain_id);
   ClassDB::bind_method(D_METHOD("get_chain_id"), &Transaction::get_chain_id);
 
+  ClassDB::bind_method(D_METHOD("set_v", "v"), &Transaction::set_v);
+  ClassDB::bind_method(D_METHOD("get_v"), &Transaction::get_v);
+
+  ClassDB::bind_method(D_METHOD("set_r", "r"), &Transaction::set_r);
+  ClassDB::bind_method(D_METHOD("get_r"), &Transaction::get_r);
+
+  ClassDB::bind_method(D_METHOD("set_s", "s"), &Transaction::set_s);
+  ClassDB::bind_method(D_METHOD("get_s"), &Transaction::get_s);
+
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "nonce"), "set_nonce", "get_nonce");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "gas_price"), "set_gas_price", "get_gas_price");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "gas_limit"), "set_gas_limit", "get_gas_limit");
@@ -104,4 +137,7 @@ void Transaction::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "value"), "set_value", "get_value");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "data"), "set_data", "get_data");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "chain_id"), "set_chain_id", "get_chain_id");
+  ADD_PROPERTY(PropertyInfo(Variant::STRING, "v"), "set_v", "get_v");
+  ADD_PROPERTY(PropertyInfo(Variant::STRING, "r"), "set_r", "get_r");
+  ADD_PROPERTY(PropertyInfo(Variant::STRING, "s"), "set_s", "get_s");
 }

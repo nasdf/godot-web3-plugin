@@ -2,6 +2,10 @@
 
 #include "thirdparty/trezor-crypto/sha3.h"
 
+void Keccak::hash(const unsigned char* p_data, int p_len, unsigned char r_digest[32]) {
+  keccak_256(p_data, p_len, r_digest);
+}
+
 Error Keccak::update(PoolByteArray p_chunk) {
   ERR_FAIL_COND_V(ctx == nullptr, ERR_UNCONFIGURED);
   size_t len = p_chunk.size();

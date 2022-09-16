@@ -47,6 +47,15 @@ public:
   void set_chain_id(const String &p_chain_id);
   String get_chain_id() const;
 
+  void set_v(const String &p_v);
+  String get_v() const;
+
+  void set_r(const String &p_r);
+  String get_r() const;
+
+  void set_s(const String &p_s);
+  String get_s() const;
+
   PoolByteArray encode();
 };
 

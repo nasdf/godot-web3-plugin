@@ -1,15 +1,18 @@
 #include "eth_transaction.h"
 
-Error EthTransaction::request(const String &p_name, const Array &p_inputs) {
+Error EthTransaction::request(const String &p_name, const Array &p_inputs, Ref<Wallet> p_wallet) {
+  ERR_FAIL_COND_V_MSG(!wallet.is_valid(), ERR_UNCONFIGURED, "Wallet is undefined.");
   ERR_FAIL_COND_V_MSG(!contract_abi.is_valid(), ERR_UNCONFIGURED, "Contract ABI is undefined.");
   ERR_FAIL_COND_V_MSG(contract_address.empty(), ERR_UNCONFIGURED, "Contract address is empty.");
+
+  wallet = p_wallet;
 
   transaction = memnew(Transaction);  
   transaction->set_to(contract_address);
   transaction->set_data(contract_abi->encode_function_inputs(p_name, p_inputs));
 
   Array params;
-  params.push_back("0x0000000000000000000000000000000000000000"); // TODO from address
+  params.push_back(p_wallet->get_address());
   params.push_back("latest");
 
   return nonce_request->request("eth_getTransactionCount", params);
@@ -17,41 +20,37 @@ Error EthTransaction::request(const String &p_name, const Array &p_inputs) {
 
 void EthTransaction::_nonce_request_completed(int p_status, const Dictionary &p_result) {
   if (p_status != RPCRequest::RESULT_SUCCESS) {
-    emit_signal("request_completed", p_status, Dictionary());
-    return;
+    return _request_completed(p_status);
   }
 
   transaction->set_nonce(p_result["result"]);
-
   Error err = chain_id_request->request("eth_chainId");
   if (err != OK) {
-    emit_signal("request_completed", RPCRequest::RESULT_HTTP_ERROR, Dictionary());
+    return _request_completed(RPCRequest::RESULT_HTTP_ERROR);
   }
 }
 
 void EthTransaction::_chain_id_request_completed(int p_status, const Dictionary &p_result) {
   if (p_status != RPCRequest::RESULT_SUCCESS) {
-    emit_signal("request_completed", p_status, Dictionary());
-    return;
+    return _request_completed(p_status);
   }
 
   transaction->set_chain_id(p_result["result"]);
-
   Error err = gas_price_request->request("eth_gasPrice");
   if (err != OK) {
-    emit_signal("request_completed", RPCRequest::RESULT_HTTP_ERROR, Dictionary());
+    return _request_completed(RPCRequest::RESULT_HTTP_ERROR);
   }
 }
 
 void EthTransaction::_gas_price_request_completed(int p_status, const Dictionary &p_result) {
   if (p_status != RPCRequest::RESULT_SUCCESS) {
-    emit_signal("request_completed", p_status, Dictionary());
-    return;
+    return _request_completed(p_status);
   }
 
   transaction->set_gas_price(p_result["result"]);
 
   Dictionary tx;
+  tx["from"] = wallet->get_address();
   tx["to"] = transaction->get_to();
   tx["data"] = transaction->get_data();
 
@@ -60,34 +59,34 @@ void EthTransaction::_gas_price_request_completed(int p_status, const Dictionary
 
   Error err = estimate_gas_request->request("eth_estimateGas", params);
   if (err != OK) {
-    emit_signal("request_completed", RPCRequest::RESULT_HTTP_ERROR, Dictionary());
+    return _request_completed(RPCRequest::RESULT_HTTP_ERROR);
   }
 }
 
 void EthTransaction::_estimate_gas_request_completed(int p_status, const Dictionary &p_result) {
   if (p_status != RPCRequest::RESULT_SUCCESS) {
-    emit_signal("request_completed", p_status, Dictionary());
-    return;
+    return _request_completed(p_status);
   }
 
   transaction->set_gas_limit(p_result["result"]);
-
-  Error err = send_raw_tx_request->request("eth_sendRawTransaction");
+  Error err = wallet->sign_transaction(*transaction);
   if (err != OK) {
-    emit_signal("request_completed", RPCRequest::RESULT_HTTP_ERROR, Dictionary());
+    return _request_completed(RPCRequest::RESULT_HTTP_ERROR);
+  }
+
+  PoolByteArray rlp = transaction->encode();
+  String rlp_hex = String::hex_encode_buffer(rlp.read().ptr(), rlp.size());
+
+  Array params;
+  params.push_back(rlp_hex);
+
+  err = send_raw_tx_request->request("eth_sendRawTransaction", params);
+  if (err != OK) {
+    return _request_completed(RPCRequest::RESULT_HTTP_ERROR);
   }
 }
 
-void EthTransaction::_send_raw_tx_request_completed(int p_status, const Dictionary &p_result) {
-  if (p_status != RPCRequest::RESULT_SUCCESS) {
-    emit_signal("request_completed", p_status, Dictionary());
-    return;
-  }
-
-  // generate random private key
-  // Ref<Crypto> crypto = Ref<Crypto>(Crypto::create());
-  // PoolByteArray uuid = crypto->generate_random_bytes(16);
-
+void EthTransaction::_request_completed(int p_status, const Dictionary &p_result) {
   memdelete(transaction);
   transaction = nullptr;
 
@@ -111,12 +110,12 @@ String EthTransaction::get_contract_address() const {
 }
 
 void EthTransaction::_bind_methods() {
-  ClassDB::bind_method(D_METHOD("request", "name", "inputs"), &EthTransaction::request);
+  ClassDB::bind_method(D_METHOD("request", "name", "inputs", "wallet"), &EthTransaction::request);
   ClassDB::bind_method("_nonce_request_completed", &EthTransaction::_nonce_request_completed);
   ClassDB::bind_method("_chain_id_request_completed", &EthTransaction::_chain_id_request_completed);
   ClassDB::bind_method("_gas_price_request_completed", &EthTransaction::_gas_price_request_completed);
   ClassDB::bind_method("_estimate_gas_request_completed", &EthTransaction::_estimate_gas_request_completed);
-  ClassDB::bind_method("_send_raw_tx_request_completed", &EthTransaction::_send_raw_tx_request_completed);
+  ClassDB::bind_method("_request_completed", &EthTransaction::_request_completed);
 
   ClassDB::bind_method(D_METHOD("set_contract_abi", "abi"), &EthTransaction::set_contract_abi);
   ClassDB::bind_method(D_METHOD("get_contract_abi"), &EthTransaction::get_contract_abi);
@@ -149,5 +148,5 @@ EthTransaction::EthTransaction() {
 
   send_raw_tx_request = memnew(RPCRequest);
   add_child(send_raw_tx_request);
-  send_raw_tx_request->connect("request_completed", this, "_send_raw_tx_request_completed");
+  send_raw_tx_request->connect("request_completed", this, "_request_completed");
 }
