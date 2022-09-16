@@ -7,6 +7,7 @@
 #include "rlp.h"
 #include "rpc_request.h"
 #include "transaction.h"
+#include "wallet.h"
 
 #include "core/class_db.h"
 #include "core/project_settings.h"
@@ -21,6 +22,7 @@ void register_web3_types() {
    ClassDB::register_class<RLP>();
    ClassDB::register_class<RPCRequest>();
    ClassDB::register_class<Transaction>();
+   ClassDB::register_class<Wallet>();
 
    abi_loader.instance();
    ResourceLoader::add_resource_format_loader(abi_loader);

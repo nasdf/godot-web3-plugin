@@ -3,7 +3,7 @@
 Import('env')
 
 env_module = env.Clone()
-env_module.Prepend(CPPPATH=["thirdparty/trezor-crypto", "thirdparty/simple-rlp"])
+env_module.Prepend(CPPPATH=["thirdparty/trezor-crypto"])
 env_module.Append(CDEFINES=["USE_KECCAK", "USE_ETHEREUM"])
 
 env_trezor_crypto = env_module.Clone()

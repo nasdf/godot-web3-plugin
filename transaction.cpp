@@ -71,14 +71,11 @@ PoolByteArray Transaction::encode() {
   PoolByteArray out;
   out.append_array(rlp.encode_length(list.size(), 192));
   out.append_array(list);
-  
+
   return out;
 }
 
 void Transaction::_bind_methods() {
-  ClassDB::bind_method(D_METHOD("set_chain_id", "chain_id"), &Transaction::set_chain_id);
-  ClassDB::bind_method(D_METHOD("get_chain_id"), &Transaction::get_chain_id);
-
   ClassDB::bind_method(D_METHOD("set_nonce", "nonce"), &Transaction::set_nonce);
   ClassDB::bind_method(D_METHOD("get_nonce"), &Transaction::get_nonce);
 
@@ -97,11 +94,14 @@ void Transaction::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_data", "data"), &Transaction::set_data);
   ClassDB::bind_method(D_METHOD("get_data"), &Transaction::get_data);
 
-  ADD_PROPERTY(PropertyInfo(Variant::STRING, "chain_id"), "set_chain_id", "get_chain_id");
+  ClassDB::bind_method(D_METHOD("set_chain_id", "chain_id"), &Transaction::set_chain_id);
+  ClassDB::bind_method(D_METHOD("get_chain_id"), &Transaction::get_chain_id);
+
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "nonce"), "set_nonce", "get_nonce");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "gas_price"), "set_gas_price", "get_gas_price");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "gas_limit"), "set_gas_limit", "get_gas_limit");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "to"), "set_to", "get_to");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "value"), "set_value", "get_value");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "data"), "set_data", "get_data");
+  ADD_PROPERTY(PropertyInfo(Variant::STRING, "chain_id"), "set_chain_id", "get_chain_id");
 }
