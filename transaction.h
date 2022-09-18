@@ -15,6 +15,7 @@ class Transaction : public Reference {
   String value;
   String data;
   String chain_id;
+  String hash;
 
   String v;
   String r;
@@ -55,6 +56,9 @@ public:
 
   void set_s(const String &p_s);
   String get_s() const;
+
+  void set_hash(const String &p_hash);
+  String get_hash() const;
 
   PoolByteArray encode();
 };

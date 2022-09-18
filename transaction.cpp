@@ -80,6 +80,14 @@ String Transaction::get_s() const {
   return s;
 }
 
+void Transaction::set_hash(const String &p_hash) {
+  hash = p_hash;
+}
+
+String Transaction::get_hash() const {
+  return hash;
+}
+
 PoolByteArray Transaction::encode() {
   PoolByteArray list;
   list.append_array(rlp.encode(nonce));
@@ -130,6 +138,9 @@ void Transaction::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_s", "s"), &Transaction::set_s);
   ClassDB::bind_method(D_METHOD("get_s"), &Transaction::get_s);
 
+  ClassDB::bind_method(D_METHOD("set_hash", "hash"), &Transaction::set_hash);
+  ClassDB::bind_method(D_METHOD("get_hash"), &Transaction::get_hash);
+
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "nonce"), "set_nonce", "get_nonce");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "gas_price"), "set_gas_price", "get_gas_price");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "gas_limit"), "set_gas_limit", "get_gas_limit");
@@ -140,4 +151,5 @@ void Transaction::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "v"), "set_v", "get_v");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "r"), "set_r", "get_r");
   ADD_PROPERTY(PropertyInfo(Variant::STRING, "s"), "set_s", "get_s");
+  ADD_PROPERTY(PropertyInfo(Variant::STRING, "hash"), "set_hash", "get_hash");
 }

@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://menu.gd" type="Script" id=1]
+[ext_resource path="res://inventory-abi.json" type="ABI" id=2]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="EthTransaction" type="EthTransaction" parent="."]
+contract_abi = ExtResource( 2 )
+contract_address = "0x1C739d7366Ff4FfEd87Cceedb8791D99d2aC4B6d"

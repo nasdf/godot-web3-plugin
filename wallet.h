@@ -17,7 +17,7 @@ protected:
 public:
   String get_address() const;
   
-  Error set_private_key(const PoolByteArray &p_private_key);
+  Error set_private_key(const String &p_private_key);
   Error sign_transaction(Transaction &p_transaction);
 };
 

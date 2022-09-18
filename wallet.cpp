@@ -1,17 +1,20 @@
 #include "wallet.h"
 
 #include "keccak.h"
+#include "string_utils.h"
 
 #include "thirdparty/trezor-crypto/ecdsa.h"
 #include "thirdparty/trezor-crypto/secp256k1.h"
 
 String Wallet::get_address() const {
-  return address;
+  return "0x" + address;
 }
 
-Error Wallet::set_private_key(const PoolByteArray &p_private_key) {
-  ERR_FAIL_COND_V_MSG(p_private_key.size() != 32, ERR_INVALID_PARAMETER, "Private key must be 32 bytes.");
-  memcpy(private_key, p_private_key.read().ptr(), 32);
+Error Wallet::set_private_key(const String &p_private_key) {
+  PoolByteArray private_key_hex = StringUtils::hex_to_bytes(p_private_key);
+
+  ERR_FAIL_COND_V_MSG(private_key_hex.size() != 32, ERR_INVALID_PARAMETER, "Private key must be 32 bytes.");
+  memcpy(private_key, private_key_hex.read().ptr(), 32);
   
   // get the uncompressed public key
   uint8_t public_key[65];
@@ -39,11 +42,11 @@ Error Wallet::sign_transaction(Transaction &p_transaction) {
 
   // EIP 155 replay protection
   int chain_id = p_transaction.get_chain_id().hex_to_int(true);
-  int v = 2 * chain_id + (pby % 2) + pby;
+  int v = 2 * chain_id + 35 + pby;
 
+  p_transaction.set_v(String::num_int64(v, 16));
   p_transaction.set_r(String::hex_encode_buffer(sig, 32));
   p_transaction.set_s(String::hex_encode_buffer(sig + 32, 32));
-  p_transaction.set_v(String::num_int64(v, 16));
 
   return OK;
 }

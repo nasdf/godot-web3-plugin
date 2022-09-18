@@ -1,7 +1,7 @@
 #include "eth_transaction.h"
 
 Error EthTransaction::request(const String &p_name, const Array &p_inputs, Ref<Wallet> p_wallet) {
-  ERR_FAIL_COND_V_MSG(!wallet.is_valid(), ERR_UNCONFIGURED, "Wallet is undefined.");
+  ERR_FAIL_COND_V_MSG(!p_wallet.is_valid(), ERR_UNCONFIGURED, "Wallet is undefined.");
   ERR_FAIL_COND_V_MSG(!contract_abi.is_valid(), ERR_UNCONFIGURED, "Contract ABI is undefined.");
   ERR_FAIL_COND_V_MSG(contract_address.empty(), ERR_UNCONFIGURED, "Contract address is empty.");
 
@@ -78,7 +78,7 @@ void EthTransaction::_estimate_gas_request_completed(int p_status, const Diction
   String rlp_hex = String::hex_encode_buffer(rlp.read().ptr(), rlp.size());
 
   Array params;
-  params.push_back(rlp_hex);
+  params.push_back("0x" + rlp_hex);
 
   err = send_raw_tx_request->request("eth_sendRawTransaction", params);
   if (err != OK) {
@@ -86,11 +86,43 @@ void EthTransaction::_estimate_gas_request_completed(int p_status, const Diction
   }
 }
 
+void EthTransaction::_send_raw_tx_request_completed(int p_status, const Dictionary &p_result) {
+  if (p_status != RPCRequest::RESULT_SUCCESS) {
+    return _request_completed(p_status);
+  }
+
+  transaction->set_hash(p_result["result"]);
+  get_tx_receipt_timer->start();
+}
+
+void EthTransaction::_get_tx_receipt_request_completed(int p_status, const Dictionary &p_result) {
+  if (p_status != RPCRequest::RESULT_SUCCESS) {
+    return _request_completed(p_status);
+  }
+
+  Dictionary receipt = p_result["result"];
+  if (!receipt.empty()) {
+    return _request_completed(p_status, p_result);
+  }
+
+  get_tx_receipt_timer->start();
+}
+
 void EthTransaction::_request_completed(int p_status, const Dictionary &p_result) {
   memdelete(transaction);
   transaction = nullptr;
 
   emit_signal("request_completed", p_status, p_result);
+}
+
+void EthTransaction::_get_tx_receipt_timeout() {
+  Array params;
+  params.push_back(transaction->get_hash());
+
+  Error err = get_tx_receipt_request->request("eth_getTransactionReceipt", params);
+  if (err != OK) {
+    return _request_completed(RPCRequest::RESULT_HTTP_ERROR);
+  }
 }
 
 void EthTransaction::set_contract_abi(const Ref<ABI> &p_abi) {
@@ -115,7 +147,9 @@ void EthTransaction::_bind_methods() {
   ClassDB::bind_method("_chain_id_request_completed", &EthTransaction::_chain_id_request_completed);
   ClassDB::bind_method("_gas_price_request_completed", &EthTransaction::_gas_price_request_completed);
   ClassDB::bind_method("_estimate_gas_request_completed", &EthTransaction::_estimate_gas_request_completed);
-  ClassDB::bind_method("_request_completed", &EthTransaction::_request_completed);
+  ClassDB::bind_method("_send_raw_tx_request_completed", &EthTransaction::_send_raw_tx_request_completed);
+  ClassDB::bind_method("_get_tx_receipt_request_completed", &EthTransaction::_get_tx_receipt_request_completed);
+  ClassDB::bind_method("_get_tx_receipt_timeout", &EthTransaction::_get_tx_receipt_timeout);
 
   ClassDB::bind_method(D_METHOD("set_contract_abi", "abi"), &EthTransaction::set_contract_abi);
   ClassDB::bind_method(D_METHOD("get_contract_abi"), &EthTransaction::get_contract_abi);
@@ -148,5 +182,15 @@ EthTransaction::EthTransaction() {
 
   send_raw_tx_request = memnew(RPCRequest);
   add_child(send_raw_tx_request);
-  send_raw_tx_request->connect("request_completed", this, "_request_completed");
+  send_raw_tx_request->connect("request_completed", this, "_send_raw_tx_request_completed");
+
+  get_tx_receipt_request = memnew(RPCRequest);
+  add_child(get_tx_receipt_request);
+  get_tx_receipt_request->connect("request_completed", this, "_get_tx_receipt_request_completed");
+
+  get_tx_receipt_timer = memnew(Timer);
+  add_child(get_tx_receipt_timer);
+  get_tx_receipt_timer->set_one_shot(true);
+  get_tx_receipt_timer->set_wait_time(3.0);
+  get_tx_receipt_timer->connect("timeout", this, "_get_tx_receipt_timeout");
 }

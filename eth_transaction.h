@@ -2,6 +2,7 @@
 #define ETH_TRANSACTION
 
 #include "scene/main/node.h"
+#include "scene/main/timer.h"
 
 #include "abi.h"
 #include "rpc_request.h"
@@ -22,12 +23,18 @@ class EthTransaction : public Node {
   RPCRequest *gas_price_request = nullptr;
   RPCRequest *estimate_gas_request = nullptr;
   RPCRequest *send_raw_tx_request = nullptr;
+  RPCRequest *get_tx_receipt_request = nullptr;
 
   void _nonce_request_completed(int p_status, const Dictionary &p_result);
   void _chain_id_request_completed(int p_status, const Dictionary &p_result);
   void _gas_price_request_completed(int p_status, const Dictionary &p_result);
   void _estimate_gas_request_completed(int p_status, const Dictionary &p_result);
+  void _send_raw_tx_request_completed(int p_status, const Dictionary &p_result);
+  void _get_tx_receipt_request_completed(int p_status, const Dictionary &p_result);
   void _request_completed(int p_status, const Dictionary &p_result = Dictionary());
+
+  Timer *get_tx_receipt_timer;
+  void _get_tx_receipt_timeout();
   
 protected:
   static void _bind_methods();
