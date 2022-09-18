@@ -75,18 +75,15 @@ void ABI::parse_function(const Dictionary &p_function) {
     function.outputs.push_back(output);
   }
 
+  Vector<String> inputs;
+  for (int i = 0; i < function.inputs.size(); i++) {
+    inputs.push_back(function.inputs[i].type);
+  }
+
   String signature;
   signature += function.name;
   signature += "(";
-
-  for (int i = 0; i < function.inputs.size(); i++) {
-    Parameter input = function.inputs[i];
-    if (i > 0) {
-      signature += ",";
-    }
-    signature += input.type;
-  }
-
+  signature += String(",").join(inputs);
   signature += ")";
 
   CharString cs = signature.utf8();
