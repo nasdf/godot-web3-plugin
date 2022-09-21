@@ -24,21 +24,25 @@ void RPCRequest::_request_completed(int p_status, int p_code, const PoolStringAr
   }
 
   String response_json;
-  {
-    PoolByteArray::Read r = p_data.read();
-    response_json.parse_utf8((const char *)r.ptr(), p_data.size());
-  }
+  response_json.parse_utf8((const char *)p_data.read().ptr(), p_data.size());
 
   Variant json;
   String errs;
   int errline;
+
   Error err = JSON::parse(response_json, json, errs, errline);
   if (err != OK) {
     emit_signal("request_completed", RESULT_JSON_ERROR, Dictionary());
     return;
   }
 
-  emit_signal("request_completed", RESULT_SUCCESS, json);
+  Dictionary result = json;
+  if (result.has("error")) {
+    emit_signal("request_completed", RESULT_RPC_ERROR, Dictionary());
+    return;
+  }
+
+  emit_signal("request_completed", RESULT_SUCCESS, result);
 }
 
 void RPCRequest::_bind_methods() {

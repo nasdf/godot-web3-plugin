@@ -11,6 +11,7 @@ class EthCall : public Node {
 
   Ref<ABI> contract_abi;
   String contract_address;
+  String function_name;
 
   RPCRequest *rpc_request = nullptr;
   void _request_completed(int p_status, const Dictionary &p_result);

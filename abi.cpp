@@ -5,26 +5,109 @@
 #include "core/io/json.h"
 #include "core/os/file_access.h"
 
-String ABI::encode_function_inputs(const String &p_name, const Array &p_inputs) {
+String ABI::encode_uint256(const int p_value) {
+  return String::num_int64(p_value, 16).lpad(64, "0");
+}
+
+int ABI::decode_uint256(const String &p_value) {
+  return p_value.hex_to_int(false);
+}
+
+String ABI::encode_address(const String &p_address) {
+  return p_address.trim_prefix("0x").lpad(64, "0");
+}
+
+String ABI::decode_address(const String &p_value) {
+  return p_value.substr(44);
+}
+
+String ABI::encode_array(const Array &p_array) {
+  String encoded;
+  for (int i = 0; i < p_array.size(); i++) {
+    encoded += encode_address(p_array[i]);
+  }
+  return encoded;
+}
+
+Array ABI::decode_array(const String &p_value, const int p_length, const String &p_type) {
+  Array array;
+  for (int i = 0; i < p_length; i++) {
+    String entry = p_value.substr(i * 64, 64);
+    if (p_type == "address") {
+      array.push_back(decode_address(entry));
+    } else if (p_type == "uint256") {
+      array.push_back(decode_uint256(entry));
+    }
+  }
+  return array;
+}
+
+String ABI::encode_function(const String &p_name, const Array &p_inputs) {
   ERR_FAIL_COND_V_MSG(!functions.has(p_name), String(), "Method doesn't exist");
+  
   Function function = functions[p_name];
-
   Vector<Parameter> inputs = function.inputs;
-  ERR_FAIL_COND_V_MSG(inputs.size() != p_inputs.size(), String(), "Method inputs don't match");
+  
+  // ERR_FAIL_COND_V_MSG(inputs.size() != p_inputs.size(), String(), "Method inputs don't match");
 
-  String enc;
-  enc += "0x";
-  enc += function.signature;
+  String head;
+  String body;
 
-  for (int i = 0; i < p_inputs.size(); i++) {
+  int offset = p_inputs.size();
+  for (int i = 0; i < inputs.size(); i++) {
     Parameter input = inputs[i];
-    ERR_FAIL_COND_V_MSG(input.type != "address" && input.type != "uint256", String(), "Unsupported input type");
-
-    String value = p_inputs[i];
-    enc += value.trim_prefix("0x").lpad(64, "0");
+    if (input.type == "address" || input.type == "uint256") {
+      String value = p_inputs[i];
+      head += encode_address(value);
+    } else if (input.type == "address[]" || input.type == "uint256[]") {
+      Array value = p_inputs[i];
+      head += encode_uint256(offset * 32);
+      body += encode_uint256(value.size());
+      body += encode_array(value);
+      offset += value.size() + 1;
+    } else {
+      ERR_FAIL_COND_V_MSG(true, String(), "Unsupported input type");
+    }
   }
 
-  return enc;
+  return "0x" + function.signature + head + body;
+}
+
+Array ABI::decode_function(const String &p_name, const String &p_value) {
+  ERR_FAIL_COND_V_MSG(!functions.has(p_name), Array(), "Method doesn't exist");
+
+  Function function = functions[p_name];
+  Vector<Parameter> outputs = function.outputs;
+
+  Array out;
+  String enc = p_value.trim_prefix("0x");
+
+  for (int i = 0; i < outputs.size(); i++) {
+    Parameter output = outputs[i];
+    if (output.type == "address") {
+      String data = enc.substr(i * 64, 64);
+      String value = decode_address(data);
+      out.push_back(value);
+    } else if (output.type == "uint256") {
+      String data = enc.substr(i * 64, 64);
+      int value = decode_uint256(data);
+      out.push_back(value);
+    } else if (output.type == "address[]") {
+      int offset = enc.substr(i * 64, 64).hex_to_int(false);
+      int length = enc.substr(offset * 2, 64).hex_to_int(false);
+      String data = enc.substr(offset * 2 + 64, length * 64);
+      Array value = decode_array(data, length, "address");
+      out.push_back(value);
+    } else if (output.type == "uint256[]") {
+      int offset = enc.substr(i * 64, 64).hex_to_int(false);
+      int length = enc.substr(offset * 2, 64).hex_to_int(false);
+      String data = enc.substr(offset * 2 + 64, length * 64);
+      Array value = decode_array(data, length, "uint256");
+      out.push_back(value);
+    }
+  }
+
+  return out;
 }
 
 Error ABI::parse(const String &p_json) {

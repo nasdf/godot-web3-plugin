@@ -1,13 +1,597 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=10 format=2]
 
-[ext_resource path="res://menu.gd" type="Script" id=1]
-[ext_resource path="res://inventory-abi.json" type="ABI" id=2]
+[ext_resource path="res://images/GUI.png" type="Texture" id=1]
+[ext_resource path="res://fonts/PixeloidSans-nR3g1.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://images/0.png" type="Texture" id=3]
+[ext_resource path="res://images/1.png" type="Texture" id=4]
+[ext_resource path="res://images/2.png" type="Texture" id=5]
+[ext_resource path="res://images/3.png" type="Texture" id=6]
+[ext_resource path="res://Shop.gd" type="Script" id=7]
+[ext_resource path="res://inventory-abi.json" type="ABI" id=8]
 
-[node name="Control" type="Control"]
+[sub_resource type="DynamicFont" id=1]
+size = 18
+font_data = ExtResource( 2 )
+
+[node name="Main" type="Node"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Shop" type="Control" parent="CanvasLayer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 1 )
+script = ExtResource( 7 )
 
-[node name="EthTransaction" type="EthTransaction" parent="."]
-contract_abi = ExtResource( 2 )
+[node name="Purchase" type="Control" parent="CanvasLayer/Shop"]
+margin_left = 40.0
+margin_top = 40.0
+margin_right = 450.0
+margin_bottom = 200.0
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Purchase"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 262, 313 )
+texture = ExtResource( 1 )
+region_rect = Rect2( -0.582, 95.929, 47.7317, 33.022 )
+patch_margin_left = 7
+patch_margin_top = 6
+patch_margin_right = 6
+patch_margin_bottom = 6
+
+[node name="Label" type="Label" parent="CanvasLayer/Shop/Purchase"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -127.5
+margin_right = 127.5
+margin_bottom = 53.0
+custom_fonts/font = SubResource( 1 )
+text = "PURCHASE"
+align = 1
+valign = 1
+
+[node name="GridContainer" type="GridContainer" parent="CanvasLayer/Shop/Purchase"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 20.0
+margin_top = 66.0
+margin_right = -20.0
+margin_bottom = -20.0
+custom_constants/hseparation = 20
+columns = 4
+
+[node name="CookieButton" type="Button" parent="CanvasLayer/Shop/Purchase/GridContainer"]
+margin_right = 78.0
+margin_bottom = 74.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+flat = true
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Purchase/GridContainer/CookieButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 1.10573, 34.0937, 44.7473, 44.9945 )
+patch_margin_left = 15
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Shop/Purchase/GridContainer/CookieButton/Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+texture = ExtResource( 3 )
+expand = true
+
+[node name="AppleButton" type="Button" parent="CanvasLayer/Shop/Purchase/GridContainer"]
+margin_left = 98.0
+margin_right = 176.0
+margin_bottom = 74.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+flat = true
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Purchase/GridContainer/AppleButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 1.10573, 34.0937, 44.7473, 44.9945 )
+patch_margin_left = 15
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Shop/Purchase/GridContainer/AppleButton/Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+texture = ExtResource( 4 )
+expand = true
+
+[node name="CheeseButton" type="Button" parent="CanvasLayer/Shop/Purchase/GridContainer"]
+margin_left = 196.0
+margin_right = 273.0
+margin_bottom = 74.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+flat = true
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Purchase/GridContainer/CheeseButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 1.10573, 34.0937, 44.7473, 44.9945 )
+patch_margin_left = 15
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Shop/Purchase/GridContainer/CheeseButton/Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+texture = ExtResource( 5 )
+expand = true
+
+[node name="PotatoButton" type="Button" parent="CanvasLayer/Shop/Purchase/GridContainer"]
+margin_left = 293.0
+margin_right = 370.0
+margin_bottom = 74.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+flat = true
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Purchase/GridContainer/PotatoButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 1.10573, 34.0937, 44.7473, 44.9945 )
+patch_margin_left = 15
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Shop/Purchase/GridContainer/PotatoButton/Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+texture = ExtResource( 6 )
+expand = true
+
+[node name="Inventory" type="Control" parent="CanvasLayer/Shop"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -450.0
+margin_top = 40.0
+margin_right = -40.0
+margin_bottom = 200.0
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Inventory"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 262, 313 )
+texture = ExtResource( 1 )
+region_rect = Rect2( -0.582, 95.929, 47.7317, 33.022 )
+patch_margin_left = 7
+patch_margin_top = 6
+patch_margin_right = 6
+patch_margin_bottom = 6
+
+[node name="Label" type="Label" parent="CanvasLayer/Shop/Inventory"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -127.5
+margin_right = 127.5
+margin_bottom = 53.0
+custom_fonts/font = SubResource( 1 )
+text = "INVENTORY"
+align = 1
+valign = 1
+
+[node name="GridContainer" type="GridContainer" parent="CanvasLayer/Shop/Inventory"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 20.0
+margin_top = 66.0
+margin_right = -20.0
+margin_bottom = -20.0
+custom_constants/hseparation = 20
+columns = 4
+
+[node name="Cookie" type="NinePatchRect" parent="CanvasLayer/Shop/Inventory/GridContainer"]
+margin_right = 78.0
+margin_bottom = 74.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 1.10573, 34.0937, 44.7473, 44.9945 )
+patch_margin_left = 15
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Shop/Inventory/GridContainer/Cookie"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+texture = ExtResource( 3 )
+expand = true
+
+[node name="Count" type="Label" parent="CanvasLayer/Shop/Inventory/GridContainer/Cookie"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 1 )
+text = "0"
+align = 2
+valign = 2
+
+[node name="Apple" type="NinePatchRect" parent="CanvasLayer/Shop/Inventory/GridContainer"]
+margin_left = 98.0
+margin_right = 176.0
+margin_bottom = 74.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 1.10573, 34.0937, 44.7473, 44.9945 )
+patch_margin_left = 15
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Shop/Inventory/GridContainer/Apple"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+texture = ExtResource( 4 )
+expand = true
+
+[node name="Count" type="Label" parent="CanvasLayer/Shop/Inventory/GridContainer/Apple"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 1 )
+text = "0"
+align = 2
+valign = 2
+
+[node name="Cheese" type="NinePatchRect" parent="CanvasLayer/Shop/Inventory/GridContainer"]
+margin_left = 196.0
+margin_right = 273.0
+margin_bottom = 74.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 1.10573, 34.0937, 44.7473, 44.9945 )
+patch_margin_left = 15
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Shop/Inventory/GridContainer/Cheese"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+texture = ExtResource( 5 )
+expand = true
+
+[node name="Count" type="Label" parent="CanvasLayer/Shop/Inventory/GridContainer/Cheese"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 1 )
+text = "0"
+align = 2
+valign = 2
+
+[node name="Potato" type="NinePatchRect" parent="CanvasLayer/Shop/Inventory/GridContainer"]
+margin_left = 293.0
+margin_right = 370.0
+margin_bottom = 74.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 1.10573, 34.0937, 44.7473, 44.9945 )
+patch_margin_left = 15
+patch_margin_top = 14
+patch_margin_right = 14
+patch_margin_bottom = 16
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Shop/Inventory/GridContainer/Potato"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+texture = ExtResource( 6 )
+expand = true
+
+[node name="Count" type="Label" parent="CanvasLayer/Shop/Inventory/GridContainer/Potato"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 1 )
+text = "0"
+align = 2
+valign = 2
+
+[node name="Help" type="Control" parent="CanvasLayer/Shop"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 40.0
+margin_top = -200.0
+margin_right = 450.0
+margin_bottom = -40.0
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Help"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 262, 313 )
+texture = ExtResource( 1 )
+region_rect = Rect2( -0.582, 95.929, 47.7317, 33.022 )
+patch_margin_left = 7
+patch_margin_top = 6
+patch_margin_right = 6
+patch_margin_bottom = 6
+
+[node name="Label" type="Label" parent="CanvasLayer/Shop/Help"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 20.0
+margin_top = 20.0
+margin_right = -20.0
+margin_bottom = -20.0
+custom_fonts/font = SubResource( 1 )
+text = "Click an item in the shop to purchase. Your inventory and balance will automatically update when the transaction is confirmed."
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Account" type="Control" parent="CanvasLayer/Shop"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -450.0
+margin_top = -200.0
+margin_right = -40.0
+margin_bottom = -40.0
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Account"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 262, 313 )
+texture = ExtResource( 1 )
+region_rect = Rect2( -0.582, 95.929, 47.7317, 33.022 )
+patch_margin_left = 7
+patch_margin_top = 6
+patch_margin_right = 6
+patch_margin_bottom = 6
+
+[node name="Address" type="HBoxContainer" parent="CanvasLayer/Shop/Account"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -180.0
+margin_top = 36.0
+margin_right = 180.0
+margin_bottom = 93.0
+
+[node name="Label" type="Label" parent="CanvasLayer/Shop/Account/Address"]
+margin_right = 178.0
+margin_bottom = 57.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/font = SubResource( 1 )
+text = "Address"
+valign = 1
+autowrap = true
+
+[node name="Value" type="Label" parent="CanvasLayer/Shop/Account/Address"]
+margin_left = 182.0
+margin_right = 360.0
+margin_bottom = 57.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/font = SubResource( 1 )
+text = "0x0000..0000"
+align = 2
+valign = 1
+autowrap = true
+
+[node name="Balance" type="HBoxContainer" parent="CanvasLayer/Shop/Account"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -180.0
+margin_top = -78.0
+margin_right = 180.0
+margin_bottom = -24.0
+
+[node name="Label" type="Label" parent="CanvasLayer/Shop/Account/Balance"]
+margin_right = 178.0
+margin_bottom = 54.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/font = SubResource( 1 )
+text = "Balance"
+valign = 1
+autowrap = true
+
+[node name="Value" type="Label" parent="CanvasLayer/Shop/Account/Balance"]
+margin_left = 182.0
+margin_right = 360.0
+margin_bottom = 54.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_fonts/font = SubResource( 1 )
+text = "0"
+align = 2
+valign = 1
+autowrap = true
+
+[node name="Confirm" type="Popup" parent="CanvasLayer/Shop"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -150.0
+margin_top = -80.0
+margin_right = 150.0
+margin_bottom = 80.0
+popup_exclusive = true
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Confirm"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 262, 313 )
+texture = ExtResource( 1 )
+region_rect = Rect2( -0.582, 95.929, 47.7317, 33.022 )
+patch_margin_left = 7
+patch_margin_top = 6
+patch_margin_right = 6
+patch_margin_bottom = 6
+
+[node name="Text" type="Label" parent="CanvasLayer/Shop/Confirm"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -127.5
+margin_right = 127.5
+margin_bottom = 120.0
+custom_fonts/font = SubResource( 1 )
+text = "Purchase Item?"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="NoButton" type="Button" parent="CanvasLayer/Shop/Confirm"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 25.0
+margin_top = -60.0
+margin_right = 125.0
+margin_bottom = -30.0
+
+[node name="NinePatchRect" type="NinePatchRect" parent="CanvasLayer/Shop/Confirm/NoButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 111.68, 80.3497, 33.0885, 15.6485 )
+patch_margin_left = 5
+patch_margin_top = 4
+patch_margin_right = 6
+patch_margin_bottom = 5
+
+[node name="Text" type="Label" parent="CanvasLayer/Shop/Confirm/NoButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 1 )
+text = "No"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="YesButton" type="Button" parent="CanvasLayer/Shop/Confirm"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -125.0
+margin_top = -60.0
+margin_right = -25.0
+margin_bottom = -30.0
+
+[node name="NinePatchRect" type="NinePatchRect" parent="CanvasLayer/Shop/Confirm/YesButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource( 1 )
+region_rect = Rect2( 111.68, 80.3497, 33.0885, 15.6485 )
+patch_margin_left = 5
+patch_margin_top = 4
+patch_margin_right = 6
+patch_margin_bottom = 5
+
+[node name="Text" type="Label" parent="CanvasLayer/Shop/Confirm/YesButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 1 )
+text = "Yes"
+align = 1
+valign = 1
+autowrap = true
+
+[node name="Loading" type="Popup" parent="CanvasLayer/Shop"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -150.0
+margin_top = -80.0
+margin_right = 150.0
+margin_bottom = 80.0
+popup_exclusive = true
+
+[node name="Background" type="NinePatchRect" parent="CanvasLayer/Shop/Loading"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 262, 313 )
+texture = ExtResource( 1 )
+region_rect = Rect2( -0.582, 95.929, 47.7317, 33.022 )
+patch_margin_left = 7
+patch_margin_top = 6
+patch_margin_right = 6
+patch_margin_bottom = 6
+
+[node name="Text" type="Label" parent="CanvasLayer/Shop/Loading"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 20.0
+margin_top = 20.0
+margin_right = -20.0
+margin_bottom = -20.0
+custom_fonts/font = SubResource( 1 )
+text = "Waiting for transaction..."
+align = 1
+valign = 1
+autowrap = true
+
+[node name="EthTransaction" type="EthTransaction" parent="CanvasLayer/Shop"]
+contract_abi = ExtResource( 8 )
+contract_address = "0x1C739d7366Ff4FfEd87Cceedb8791D99d2aC4B6d"
+
+[node name="EthBalance" type="EthBalance" parent="CanvasLayer/Shop"]
+
+[node name="EthCall" type="EthCall" parent="CanvasLayer/Shop"]
+contract_abi = ExtResource( 8 )
 contract_address = "0x1C739d7366Ff4FfEd87Cceedb8791D99d2aC4B6d"

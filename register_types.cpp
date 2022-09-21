@@ -1,6 +1,7 @@
 #include "register_types.h"
 
 #include "abi.h"
+#include "eth_balance.h"
 #include "eth_call.h"
 #include "eth_transaction.h"
 #include "keccak.h"
@@ -16,6 +17,7 @@ static Ref<ResourceFormatLoaderABI> abi_loader;
 
 void register_web3_types() {
    ClassDB::register_class<ABI>();
+   ClassDB::register_class<EthBalance>();
    ClassDB::register_class<EthCall>();
    ClassDB::register_class<EthTransaction>();
    ClassDB::register_class<Keccak>();

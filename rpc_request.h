@@ -18,7 +18,8 @@ public:
   enum Result {
     RESULT_SUCCESS,
     RESULT_HTTP_ERROR,
-    RESULT_JSON_ERROR
+    RESULT_JSON_ERROR,
+    RESULT_RPC_ERROR
   };
 
   Error request(const String &p_method, const Array &p_params = Array());

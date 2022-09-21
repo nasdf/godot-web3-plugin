@@ -9,7 +9,7 @@ Error EthTransaction::request(const String &p_name, const Array &p_inputs, Ref<W
 
   transaction = memnew(Transaction);  
   transaction->set_to(contract_address);
-  transaction->set_data(contract_abi->encode_function_inputs(p_name, p_inputs));
+  transaction->set_data(contract_abi->encode_function(p_name, p_inputs));
 
   Array params;
   params.push_back(p_wallet->get_address());

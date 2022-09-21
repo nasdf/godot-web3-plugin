@@ -30,8 +30,17 @@ protected:
 public:
   Error parse(const String &p_json);
 
-  String encode_function_inputs(const String &p_name, const Array &p_inputs);
-  // void decode_function_outputs(const String &p_name, const Array &p_outputs);
+  Array decode_array(const String &p_value, const int p_length, const String &p_type);
+  String encode_array(const Array &p_array);
+
+  String encode_uint256(const int p_value);
+  int decode_uint256(const String &p_value);
+
+  String encode_address(const String &p_value);
+  String decode_address(const String &p_value);
+
+  String encode_function(const String &p_name, const Array &p_inputs);
+  Array decode_function(const String &p_name, const String &p_value);
 };
 
 class ResourceFormatLoaderABI : public ResourceFormatLoader {
