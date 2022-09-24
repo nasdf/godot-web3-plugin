@@ -7,7 +7,7 @@
 [ext_resource path="res://images/2.png" type="Texture" id=5]
 [ext_resource path="res://images/3.png" type="Texture" id=6]
 [ext_resource path="res://Shop.gd" type="Script" id=7]
-[ext_resource path="res://inventory-abi.json" type="ABI" id=8]
+[ext_resource path="res://inventory.json" type="ABI" id=8]
 
 [sub_resource type="DynamicFont" id=1]
 size = 18
@@ -586,12 +586,27 @@ align = 1
 valign = 1
 autowrap = true
 
-[node name="EthTransaction" type="EthTransaction" parent="CanvasLayer/Shop"]
+[node name="Timer" type="Timer" parent="CanvasLayer/Shop"]
+wait_time = 3.0
+autostart = true
+
+[node name="EthCall" type="EthCall" parent="CanvasLayer/Shop"]
 contract_abi = ExtResource( 8 )
 contract_address = "0x1C739d7366Ff4FfEd87Cceedb8791D99d2aC4B6d"
 
 [node name="EthBalance" type="EthBalance" parent="CanvasLayer/Shop"]
 
-[node name="EthCall" type="EthCall" parent="CanvasLayer/Shop"]
+[node name="EthTransaction" type="EthTransaction" parent="CanvasLayer/Shop"]
 contract_abi = ExtResource( 8 )
 contract_address = "0x1C739d7366Ff4FfEd87Cceedb8791D99d2aC4B6d"
+
+[connection signal="pressed" from="CanvasLayer/Shop/Purchase/GridContainer/CookieButton" to="CanvasLayer/Shop" method="_purchase_cookie"]
+[connection signal="pressed" from="CanvasLayer/Shop/Purchase/GridContainer/AppleButton" to="CanvasLayer/Shop" method="_purchase_apple"]
+[connection signal="pressed" from="CanvasLayer/Shop/Purchase/GridContainer/CheeseButton" to="CanvasLayer/Shop" method="_purchase_cheese"]
+[connection signal="pressed" from="CanvasLayer/Shop/Purchase/GridContainer/PotatoButton" to="CanvasLayer/Shop" method="_purchase_potato"]
+[connection signal="pressed" from="CanvasLayer/Shop/Confirm/NoButton" to="CanvasLayer/Shop" method="_confirm_no"]
+[connection signal="pressed" from="CanvasLayer/Shop/Confirm/YesButton" to="CanvasLayer/Shop" method="_confirm_yes"]
+[connection signal="timeout" from="CanvasLayer/Shop/Timer" to="CanvasLayer/Shop" method="_update_state"]
+[connection signal="request_completed" from="CanvasLayer/Shop/EthCall" to="CanvasLayer/Shop" method="_call_completed"]
+[connection signal="request_completed" from="CanvasLayer/Shop/EthBalance" to="CanvasLayer/Shop" method="_balance_completed"]
+[connection signal="request_completed" from="CanvasLayer/Shop/EthTransaction" to="CanvasLayer/Shop" method="_transaction_completed"]

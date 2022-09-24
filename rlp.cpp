@@ -25,7 +25,10 @@ PoolByteArray RLP::encode_length(int length, int offset) {
 PoolByteArray RLP::encode(const String &p_hex) {
   PoolByteArray out;
   PoolByteArray bin = StringUtils::hex_to_bytes(p_hex);
-  if (bin.size() == 1 && bin[0] < 128) {
+  
+  if (bin.size() == 1 && bin[0] == 0) {
+    out.append(128);
+  } else if (bin.size() == 1 && bin[0] < 128) {
     out.append(bin[0]);
   } else {
     out.append_array(encode_length(bin.size(), 128));

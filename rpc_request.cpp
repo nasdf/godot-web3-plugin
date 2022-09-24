@@ -38,7 +38,7 @@ void RPCRequest::_request_completed(int p_status, int p_code, const PoolStringAr
 
   Dictionary result = json;
   if (result.has("error")) {
-    emit_signal("request_completed", RESULT_RPC_ERROR, Dictionary());
+    emit_signal("request_completed", RESULT_RPC_ERROR, result);
     return;
   }
 

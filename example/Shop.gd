@@ -3,39 +3,17 @@ extends Control
 onready var address_value = get_node("Account/Address/Value")
 onready var balance_value = get_node("Account/Balance/Value")
 
-onready var confirm_yes_button = get_node("Confirm/YesButton")
-onready var confirm_no_button = get_node("Confirm/NoButton")
-
-onready var cookie_button = get_node("Purchase/GridContainer/CookieButton")
-onready var apple_button = get_node("Purchase/GridContainer/AppleButton")
-onready var cheese_button = get_node("Purchase/GridContainer/CheeseButton")
-onready var potato_button = get_node("Purchase/GridContainer/PotatoButton")
-
 onready var cookie_count = get_node("Inventory/GridContainer/Cookie/Count")
 onready var apple_count = get_node("Inventory/GridContainer/Apple/Count")
 onready var cheese_count = get_node("Inventory/GridContainer/Cheese/Count")
 onready var potato_count = get_node("Inventory/GridContainer/Potato/Count")
 
-var token_id = ""
 var wallet = Wallet.new()
+var token_id = ""
 
 func _ready():
-	cookie_button.connect("pressed", self, "_purchase_cookie")
-	apple_button.connect("pressed", self, "_purchase_apple")
-	cheese_button.connect("pressed", self, "_purchase_cheese")
-	potato_button.connect("pressed", self, "_purchase_potato")
-	
-	confirm_no_button.connect("pressed", self, "_confirm_no")
-	confirm_yes_button.connect("pressed", self, "_confirm_yes")
-	
-	wallet.set_private_key("0x7c4a968dd1857caa582b50ffe89abeb11ed8cc4cc0828846b548b6307b5c6f39")
+	wallet.set_private_key("0x87237087a178155089c647f541071f7f636b2a3942b2fb52eb5ade8cfcc0c132")
 	address_value.text = wallet.get_address().substr(0, 6) + ".." + wallet.get_address().substr(38)
-	
-	$EthCall.connect("request_completed", self, "_call_completed")
-	$EthBalance.connect("request_completed", self, "_balance_completed")
-	$EthTransaction.connect("request_completed", self, "_transaction_completed")
-	
-	_update_state()
 	
 func _update_state():
 	var address = wallet.get_address()
@@ -68,7 +46,7 @@ func _confirm_yes():
 	$Confirm.hide()
 	$Loading.popup()
 	$EthTransaction.request("mint", [token_id], wallet)
-	
+
 func _call_completed(status, result):
 	var value = result[0] as Array
 	cookie_count.text = str(value[0])
